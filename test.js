@@ -4,6 +4,8 @@ const createCsvWriter = require("csv-writer").createObjectCsvWriter;
 
 const nameFile = __dirname + "/acme_worksheet.csv";
 let results = [];
+let arrayDate = [];
+let arrayName = [];
 
 function convertDate(object) {
   item = object.Date;
@@ -13,6 +15,37 @@ function convertDate(object) {
   if (indexMonth < 10) indexMonth = "0" + indexMonth;
   object.Date = arrayDate[2] + "-" + indexMonth + "-" + arrayDate[1];
   return object.Date;
+}
+
+function getHoursWork(date, objPerson) {
+  let hours;
+  objPerson.forEach((obj) => {
+    if (obj.Date == date) hours = obj["Work Hours"];
+  });
+  return hours;
+}
+
+function getDataPerson(results, arrName, arrDate) {
+  let objPersonHours = [];
+  let resPerson = [];
+  for (let i = 0; i < arrName.length; i++) {
+    resPerson.push(arrName[i]);
+    objPersonHours = results.filter((item) => {
+      return item["Employee Name"] == resPerson[i].nameDate ? true : false;
+    });
+    let arrayDatePerson = objPersonHours.map((obj) => obj.Date);
+    for (let j = 0; j < arrDate.length; j++) {
+      let datePerson = arrDate[j].id;
+      let workHours;
+      if (!arrayDatePerson.includes(arrDate[j].title)) {
+        workHours = 0;
+      } else {
+        workHours = getHoursWork(arrDate[j].title, objPersonHours);
+      }
+      resPerson[i][datePerson] = workHours;
+    }
+  }
+  return resPerson;
 }
 
 fs.createReadStream(nameFile)
@@ -29,4 +62,11 @@ fs.createReadStream(nameFile)
     strDate.forEach((item) => {
       if (!arrayDate.includes(item)) arrayDate.push(item);
     });
+    arrayDate = arrayDate.map((date, index) => {
+      return { id: date, title: date };
+    });
+    arrayName = arrayName.map((item) => {
+      return { nameDate: item };
+    });
+    arrayName = getDataPerson(results, arrayName, arrayDate);
   });
