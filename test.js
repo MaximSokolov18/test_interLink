@@ -69,4 +69,11 @@ fs.createReadStream(nameFile)
       return { nameDate: item };
     });
     arrayName = getDataPerson(results, arrayName, arrayDate);
+    const csvWriter = createCsvWriter({
+      path: "resultsData.csv",
+      header: [{ id: "nameDate", title: "Name / Date" }, ...arrayDate],
+    });
+    csvWriter
+      .writeRecords(arrayName)
+      .then(() => console.log("The CSV file was written successfully"));
   });
